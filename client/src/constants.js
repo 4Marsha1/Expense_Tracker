@@ -1,5 +1,5 @@
-export const EXPENSE_TYPES = ['Grocery', 'Cigarette', 'Shopping', 'Party', 'Food', 'Travel', 'Petrol', 'Rent', 'Bills', 'Credit Card', 'Outing', 'Medicine / Medical', 'Investment', 'Family', 'Misc']
-export const TABS = ["Daily Expenses", "Monthly Expenses", "Quarterly Expenses", "Lifetime Expenses", "Analysis", "Goals"]
+export const EXPENSE_TYPES = ['Grocery', 'Cigarette', 'Shopping', 'Party', 'Food', 'Travel', 'Petrol', 'Rent', 'Bills', 'Services', 'Credit Card', 'Outing', 'Medicine / Medical', 'Investment', 'Family', 'Misc']
+export const TABS = ["Daily Expenses", "Monthly Expenses", "Quarterly Expenses", "Lifetime Expenses", "Analysis", "Income"]
 export const Quarters = {
     1: 'FIRST',
     2: 'FIRST',

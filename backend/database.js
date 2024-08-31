@@ -12,8 +12,9 @@ db.serialize(() => {
     db.run(`
     CREATE TABLE IF NOT EXISTS expenses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      expenseType TEXT NOT NULL CHECK (expenseType IN ('Grocery', 'Cigarette', 'Shopping', 'Party', 'Food', 'Travel', 'Petrol', 'Rent', 'Bills', 'Credit Card', 'Outing', 'Medicine / Medical', 'Investment', 'Family', 'Misc')),
+      expenseType TEXT NOT NULL CHECK (expenseType IN ('Grocery', 'Cigarette', 'Shopping', 'Party', 'Food', 'Travel', 'Petrol', 'Rent', 'Bills', 'Services', 'Credit Card', 'Outing', 'Medicine / Medical', 'Investment', 'Family', 'Misc')),
       date TEXT NOT NULL,
+      remarks TEXT,
       amount REAL NOT NULL
     )
   `, (err) => {

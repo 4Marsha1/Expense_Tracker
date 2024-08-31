@@ -20,7 +20,7 @@ const ExcelReader = () => {
             const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
             setData(worksheet.map(item => {
                 if (!isNaN(Number(item[1]))) {
-                    return [item[2], item[5], item[6]]
+                    return [item[2], item[5], item[6], '']
                 } return []
             }));
         };
@@ -35,13 +35,14 @@ const ExcelReader = () => {
     };
 
     const handleMassAdd = async () => {
-        const newData = data.filter(item => item.length === 3);
+        const newData = data.filter(item => item.length === 4);
         if (newData.length === 0) return;
         const arr = newData.filter(item => EXPENSE_TYPES.includes(item[1])).map(item => {
             return {
                 expenseType: item[1],
                 date: `${item[0].split('/')[2]}-${item[0].split('/')[1]}-${item[0].split('/')[0]}`,
-                amount: item[2]
+                amount: item[2],
+                remarks: item[3]
             }
         })
         try {
@@ -63,9 +64,10 @@ const ExcelReader = () => {
             <table className="min-w-full bg-white border border-gray-300">
                 <thead>
                     <tr>
-                        <th className="py-2 px-4 border-b">Date</th>
-                        <th className="py-2 px-4 border-b">Expense Type</th>
-                        <th className="py-2 px-4 border-b">Amount</th>
+                        <th className="py-2 px-4 border-b w-[100px] bg-blue-300">Date</th>
+                        <th className="py-2 px-4 border-b w-2/4 bg-green-300">Expense Type</th>
+                        <th className="py-2 px-4 border-b w-1/4 bg-yellow-300">Amount</th>
+                        <th className="py-2 px-4 border-b w-1/4 bg-red-300">Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,9 +86,17 @@ const ExcelReader = () => {
                                             {EXPENSE_TYPES.map(exp => <option value={exp} key={exp}>{exp}</option>)}
                                         </select>
                                     </td>
-                                } else return <td key={colIndex} className="py-2 px-4 border-b">
+                                } else if (colIndex === 2 || colIndex === 3) {
+                                    return <input
+                                        type="text"
+                                        value={cell || ''}
+                                        onChange={(e) => handleEdit(rowIndex, colIndex, e.target.value)}
+                                        className="w-1/2"
+                                    />
+                                } else return <td key={colIndex} className="py-2 px-4 border-b w-1/6">
                                     <span>{cell}</span>
                                 </td>
+
                             })}
                         </tr>
                     ))}

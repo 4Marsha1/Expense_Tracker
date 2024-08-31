@@ -84,10 +84,7 @@ const App = () => {
                         <li
                             key={tab}
                             className={`cursor-pointer p-4 rounded mb-2 ${currentTab === tab ? "bg-gray-600" : "bg-gray-700"}`}
-                            onClick={() => {
-                                if (tab === 'Goals') return
-                                setCurrentTab(tab)
-                            }}
+                            onClick={() => setCurrentTab(tab)}
                         >
                             {tab}
                         </li>
@@ -126,7 +123,9 @@ const App = () => {
                                 onChange={() => handleCheckboxChange(exp.id)}
                                 className='basis-1/12'
                             />
-                            <span className='basis-2/6 font-medium text-lg'>{exp.expenseType}</span>
+                            <span className='basis-2/6 font-medium text-lg'>{exp.expenseType}
+                                {exp?.remarks && <span className="text-slate-600 text-base"> : {exp?.remarks}</span>}
+                            </span>
                             <span className='basis-1/6'>{exp.date}</span>
                             <span className='basis-1/6 font-bold'>₹{exp.amount}</span>
                             <button className='basis-1/6 bg-blue-400 font-bold text-white rounded-lg shadow-lg' onClick={() => setIsEditing(exp)}>Edit</button>

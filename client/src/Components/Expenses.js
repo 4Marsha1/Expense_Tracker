@@ -17,9 +17,9 @@ const Expenses = ({ expenses }) => {
     return (
         <div className='w-full h-screen bg-slate-400 p-5 flex flex-col gap-4'>
             <span className='text-2xl font-bold'>Total Expenditure</span>
-            <div className='flex flex-col gap-4'>
+            <div className='flex flex-col gap-2'>
                 {Object.entries(getStats()).map(([type, total]) => (
-                    <div key={type} className='bg-slate-600 text-white flex justify-between items-center py-2 px-4 rounded-lg shadow-lg'>
+                    <div key={type} className='bg-slate-600 text-white flex justify-between items-center py-1 px-4 rounded-lg shadow-lg'>
                         <span className='font-semibold'>{type}</span>
                         <span className='font-medium'>₹{total.toFixed(2)}</span>
                     </div>

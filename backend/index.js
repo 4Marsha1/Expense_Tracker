@@ -36,25 +36,25 @@ app.get('/expenses/:id', (req, res) => {
 });
 
 app.post('/expenses', (req, res) => {
-    const { expenseType, date, amount } = req.body;
-    const sql = `INSERT INTO expenses (expenseType, date, amount) VALUES (?, ?, ?)`;
-    db.run(sql, [expenseType, date, amount], function (err) {
+    const { expenseType, date, amount, remarks } = req.body;
+    const sql = `INSERT INTO expenses (expenseType, date, amount, remarks) VALUES (?, ?, ?, ?)`;
+    db.run(sql, [expenseType, date, amount, remarks], function (err) {
         if (err) {
             res.status(400).json({ error: err.message });
             return;
         }
         res.json({
             message: 'Expense added successfully',
-            data: { id: this.lastID, expenseType, date, amount },
+            data: { id: this.lastID, expenseType, date, amount, remarks },
         });
     });
 });
 
 app.put('/expenses/:id', (req, res) => {
     const { id } = req.params;
-    const { expenseType, date, amount } = req.body;
-    const sql = `UPDATE expenses SET expenseType = ?, date = ?, amount = ? WHERE id = ?`;
-    db.run(sql, [expenseType, date, amount, id], function (err) {
+    const { expenseType, date, amount, remarks } = req.body;
+    const sql = `UPDATE expenses SET expenseType = ?, date = ?, amount = ?, remarks = ? WHERE id = ?`;
+    db.run(sql, [expenseType, date, amount, remarks, id], function (err) {
         if (err) {
             res.status(400).json({ error: err.message });
             return;
@@ -83,15 +83,15 @@ app.delete('/expenses/:id', (req, res) => {
 
 app.post('/expenses/bulk', (req, res) => {
     const expenses = req.body;
-    const sql = `INSERT INTO expenses (expenseType, date, amount) VALUES (?, ?, ?)`;
+    const sql = `INSERT INTO expenses (expenseType, date, amount, remarks) VALUES (?, ?, ?, ?)`;
 
     db.serialize(() => {
         db.run('BEGIN TRANSACTION');
 
         const stmt = db.prepare(sql);
         for (const expense of expenses) {
-            const { expenseType, date, amount } = expense;
-            stmt.run([expenseType, date, amount], (err) => {
+            const { expenseType, date, amount, remarks } = expense;
+            stmt.run([expenseType, date, amount, remarks], (err) => {
                 if (err) {
                     db.run('ROLLBACK');
                     res.status(400).json({ error: err.message });
