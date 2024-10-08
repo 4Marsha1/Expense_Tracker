@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { EXPENSE_TYPES } from '../constants';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { DATA } from './exp';
 
 const ExcelReader = () => {
     const [data, setData] = useState([]);
@@ -53,11 +54,16 @@ const ExcelReader = () => {
         }
     }
 
+    const addJSON = async () => {
+        await axios.post('http://localhost:8080/expenses/bulk', DATA)
+    }
+
     return (
         <div className="p-4 flex flex-col gap-4">
             <div className='flex gap-6'>
                 <Link className='bg-slate-700 w-fit py-1 px-8 rounded-md shadow-lg text-white font-bold' to="/">Go To Main Dashboard</Link>
                 <button className='py-1 px-8 bg-green-600 rounded-md shadow-lg text-white font-bold' onClick={handleMassAdd}>Add</button>
+                <button className='py-1 px-8 bg-green-600 rounded-md shadow-lg text-white font-bold' onClick={addJSON}>Directly Add Excel</button>
             </div>
             <input type="file" onChange={handleFileUpload} className="mb-4 w-fit" />
 

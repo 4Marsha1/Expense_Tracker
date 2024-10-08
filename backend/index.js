@@ -1,144 +1,145 @@
 const express = require('express');
-const db = require('./database');
 const cors = require('cors');
+require("dotenv").config();
+const mongoose = require('mongoose');
+const Expense = require('./schema')
+const ObjectId = require('mongodb').ObjectId;
 
 const app = express();
 app.use(express.json());
 app.use(cors())
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI
 
-app.get('/expenses', (req, res) => {
-    const sql = 'SELECT * FROM expenses';
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'success',
-            data: rows,
-        });
-    });
+mongoose.connect(MONGODB_URI).then(() => {
+    console.log('Connected to MongoDB');
+}).catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+});;
+
+app.get('/expenses', async (req, res) => {
+    try {
+        const expenses = await Expense.find();
+        return res.status(200).json({
+            size: expenses.length,
+            data: expenses,
+            status: true,
+            message: 'Expenses retrieved successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error retrieving expenses',
+            status: false
+        })
+    }
 });
 
-app.get('/expenses/:id', (req, res) => {
+app.get('/expenses/:id', async (req, res) => {
     const { id } = req.params;
-    const sql = 'SELECT * FROM expenses WHERE id = ?';
-    db.get(sql, [id], (err, row) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'success',
-            data: row,
-        });
-    });
+    try {
+        const expenses = await Expense.findById(id);
+        return res.status(200).json({
+            data: expenses,
+            status: true,
+            message: 'Expense retrieved successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error retrieving expense',
+            status: false
+        })
+    }
 });
 
-app.post('/expenses', (req, res) => {
+app.post('/expenses', async (req, res) => {
     const { expenseType, date, amount, remarks } = req.body;
-    const sql = `INSERT INTO expenses (expenseType, date, amount, remarks) VALUES (?, ?, ?, ?)`;
-    db.run(sql, [expenseType, date, amount, remarks], function (err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'Expense added successfully',
-            data: { id: this.lastID, expenseType, date, amount, remarks },
-        });
-    });
+    const expense = new Expense({
+        expenseType,
+        date,
+        amount,
+        remarks,
+    })
+    try {
+        await expense.save();
+        return res.status(201).json({
+            data: expense,
+            status: true,
+            message: 'Expense saved successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error saving expense',
+            status: false
+        })
+    }
 });
 
-app.put('/expenses/:id', (req, res) => {
+app.put('/expenses/:id', async (req, res) => {
     const { id } = req.params;
     const { expenseType, date, amount, remarks } = req.body;
-    const sql = `UPDATE expenses SET expenseType = ?, date = ?, amount = ?, remarks = ? WHERE id = ?`;
-    db.run(sql, [expenseType, date, amount, remarks, id], function (err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'Expense updated successfully',
-            changes: this.changes,
-        });
-    });
+    try {
+        const expenses = await Expense.findByIdAndUpdate(id, { expenseType, date, amount, remarks })
+        return res.status(200).json({
+            status: true,
+            message: 'Expense updated successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error updating expense',
+            status: false
+        })
+    }
 });
 
-app.delete('/expenses/:id', (req, res) => {
+app.delete('/expenses/:id', async (req, res) => {
     const { id } = req.params;
-    const sql = `DELETE FROM expenses WHERE id = ?`;
-    db.run(sql, id, function (err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'Expense deleted successfully',
-            changes: this.changes,
-        });
-    });
+    try {
+        const expenses = await Expense.findByIdAndDelete(id);
+        return res.status(200).json({
+            status: true,
+            message: 'Expense deleted successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error deleting expense',
+            status: false
+        })
+    }
 });
 
-app.post('/expenses/bulk', (req, res) => {
+app.post('/expenses/bulk', async (req, res) => {
     const expenses = req.body;
-    const sql = `INSERT INTO expenses (expenseType, date, amount, remarks) VALUES (?, ?, ?, ?)`;
-
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-
-        const stmt = db.prepare(sql);
-        for (const expense of expenses) {
-            const { expenseType, date, amount, remarks } = expense;
-            stmt.run([expenseType, date, amount, remarks], (err) => {
-                if (err) {
-                    db.run('ROLLBACK');
-                    res.status(400).json({ error: err.message });
-                    return;
-                }
-            });
-        }
-        stmt.finalize((err) => {
-            if (err) {
-                db.run('ROLLBACK');
-                res.status(400).json({ error: err.message });
-            } else {
-                db.run('COMMIT');
-                res.json({
-                    message: 'Expenses added successfully',
-                    data: expenses,
-                });
-            }
-        });
-    });
+    try {
+        await Expense.insertMany(expenses);
+        return res.status(200).json({
+            status: true,
+            message: 'Expenses added successfully'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error saving expense',
+            status: false
+        })
+    }
 });
 
-app.post('/expenses/bulk-delete', (req, res) => {
-    const expenseIds = req.body;
-    const placeholders = expenseIds.map(() => '?').join(',');
-    const sql = `DELETE FROM expenses WHERE id IN (${placeholders})`;
-
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-
-        db.run(sql, expenseIds, function (err) {
-            if (err) {
-                db.run('ROLLBACK');
-                res.status(400).json({ error: err.message });
-            } else {
-                db.run('COMMIT');
-                res.json({
-                    message: 'Expenses deleted successfully',
-                    deletedCount: this.changes,
-                    deletedIds: expenseIds,
-                });
-            }
+app.post('/expenses/bulk-delete', async (req, res) => {
+    const idsToDelete = req.body.map((_id) => new ObjectId(`${_id}`))
+    console.log(idsToDelete);
+    try {
+        await Expense.deleteMany({ _id: { $in: idsToDelete } }).catch(err => console.log(err))
+        return res.status(200).json({
+            status: true,
+            message: 'Expenses successfully deleted!'
         });
-    });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: 'Error deleting expenses!'
+        });
+    }
 });
 
-const PORT = 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -10,7 +10,7 @@ const AddExpense = ({ getExpenses, isEditing, setIsEditing }) => {
         if (isEditing.date) {
             setNewExpense({
                 type: isEditing.expenseType,
-                date: isEditing.date,
+                date: new Date(isEditing.date).toISOString().split('T')[0],
                 amount: isEditing.amount,
                 remarks: isEditing.remarks ? isEditing.remarks : ""
             })

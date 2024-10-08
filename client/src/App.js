@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import AddExpense from "./Components/AddExpense";
 import axios from "axios";
 import Expenses from "./Components/Expenses";
-import { Quarters, TABS } from "./constants";
+import { TABS } from "./constants";
 import { Link } from "react-router-dom";
 import Analysis from "./Components/Analysis";
+import exportFromJSON from 'export-from-json'
 
 const App = () => {
     const [currentTab, setCurrentTab] = useState("Daily Expenses");
@@ -29,10 +30,9 @@ const App = () => {
     useEffect(() => {
         if (expenses.length > 0 && currentTab) {
             switch (currentTab) {
-                case 'Daily Expenses': setFilteredExpenses(expenses.filter(exp => Number(exp.date.split('-')[2]) === new Date().getDate()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); break;
+                case 'Daily Expenses': setFilteredExpenses(expenses.filter(exp => (Number(exp.date.split('-')[2].split('T')[0]) === new Date().getDate() && Number(exp.date.split('-')[1]) === new Date().getMonth() + 1)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); break;
                 case 'Monthly Expenses': setFilteredExpenses(expenses.filter(exp => Number(exp.date.split('-')[1]) === (new Date().getMonth()) + 1).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); break;
                 case 'Lifetime Expenses': setFilteredExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); break;
-                case 'Quarterly Expenses': setFilteredExpenses(expenses.filter(exp => Quarters[Number(exp.date.split('-')[1])] === Quarters[new Date().getMonth() + 1]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); break;
                 default: setFilteredExpenses(expenses)
             }
         } else {
@@ -92,6 +92,7 @@ const App = () => {
                 </ul>
                 <AddExpense getExpenses={getExpenses} isEditing={isEditing} setIsEditing={setIsEditing} />
                 <Link className="bg-slate-200 rounded-md shadow-lg text-center text-black font-bold py-1" to="/upload">Upload XLSX file</Link>
+                <button onClick={() => exportFromJSON({ data: filteredExpenses, fileName: 'exp', exportType: exportFromJSON.types.xls })}>Export to XLS</button>
             </div>
 
             {currentTab !== 'Analysis' && <>
@@ -103,7 +104,7 @@ const App = () => {
                             checked={selectedExpenses.size === filteredExpenses.length}
                             onChange={() => {
                                 if (selectedExpenses.size !== filteredExpenses.length) {
-                                    setSelectedExpenses(new Set(filteredExpenses.map(item => item.id)))
+                                    setSelectedExpenses(new Set(filteredExpenses.map(item => item._id)))
                                 } else {
                                     setSelectedExpenses(new Set())
                                 }
@@ -116,20 +117,20 @@ const App = () => {
                             <span className="font-medium text-lg text-slate-500">Please add data to get started today!</span>
                         </div>}
                     <div className="flex flex-col gap-4 overflow-y-scroll">
-                        {filteredExpenses.map(exp => <div key={exp.id} className='w-full flex justify-center items-center px-4 gap-4'>
+                        {filteredExpenses.map(exp => <div key={exp._id} className='w-full flex justify-center items-center px-4 gap-4'>
                             <input
                                 type="checkbox"
-                                checked={selectedExpenses.has(exp.id)}
-                                onChange={() => handleCheckboxChange(exp.id)}
+                                checked={selectedExpenses.has(exp._id)}
+                                onChange={() => handleCheckboxChange(exp._id)}
                                 className='basis-1/12'
                             />
                             <span className='basis-2/6 font-medium text-lg'>{exp.expenseType}
                                 {exp?.remarks && <span className="text-slate-600 text-base"> : {exp?.remarks}</span>}
                             </span>
-                            <span className='basis-1/6'>{exp.date}</span>
+                            <span className='basis-1/6'>{new Date(exp.date).toISOString().split('T')[0]}</span>
                             <span className='basis-1/6 font-bold'>₹{exp.amount}</span>
                             <button className='basis-1/6 bg-blue-400 font-bold text-white rounded-lg shadow-lg' onClick={() => setIsEditing(exp)}>Edit</button>
-                            <button className='basis-1/6 bg-red-400 font-bold text-white rounded-lg shadow-lg' onClick={() => deleteExpense(exp.id)}>Delete</button>
+                            <button className='basis-1/6 bg-red-400 font-bold text-white rounded-lg shadow-lg' onClick={() => deleteExpense(exp._id)}>Delete</button>
                         </div>)}
                     </div>
                 </div>
