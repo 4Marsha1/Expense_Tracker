@@ -92,7 +92,8 @@ const App = () => {
                 </ul>
                 <AddExpense getExpenses={getExpenses} isEditing={isEditing} setIsEditing={setIsEditing} />
                 <Link className="bg-slate-200 rounded-md shadow-lg text-center text-black font-bold py-1" to="/upload">Upload XLSX file</Link>
-                <button onClick={() => exportFromJSON({ data: filteredExpenses, fileName: 'exp', exportType: exportFromJSON.types.xls })}>Export to XLS</button>
+                <button className="bg-slate-500 rounded-md shadow-lg text-center text-white font-bold py-1"
+                    onClick={() => exportFromJSON({ data: filteredExpenses, fileName: 'exp', exportType: exportFromJSON.types.xls })}>Export to XLS</button>
             </div>
 
             {currentTab !== 'Analysis' && <>

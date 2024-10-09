@@ -59,22 +59,24 @@ const Analysis = ({ expenses }) => {
             <div className='flex gap-6'>
                 {['Daily', 'Monthly'].map((item, idx) => <div className={`${currentTab === item ? 'bg-slate-500' : 'bg-slate-700'} px-4 py-1 rounded-md shadow-lg font-bold text-white cursor-pointer`} onClick={() => setCurrentTab(item)} key={idx}>{item}</div>)}
             </div>
-            {currentTab === 'Daily' && <div>
-                <input type="date" value={firstDay} onChange={(e) => setFirstDay(e.target.value)} />
-                <input type="date" value={secondDay} onChange={(e) => setSecondDay(e.target.value)} />
-                <button onClick={() => {
+            {currentTab === 'Daily' && <div className='flex gap-12 items-center'>
+                <input type="date" className='px-2 py-1 rounded-md bg-slate-300' value={firstDay} onChange={(e) => setFirstDay(e.target.value)} />
+                <span className='font-bold'>with</span>
+                <input type="date" className='px-2 py-1 rounded-md bg-slate-300' value={secondDay} onChange={(e) => setSecondDay(e.target.value)} />
+                <button className='bg-slate-800 px-4 py-1 rounded-md text-white font-medium' onClick={() => {
                     const data = getComparisonData({ currentTab: 'Daily', _firstDay: firstDay, _secondDay: secondDay })
                     setComparisonData(data)
                 }}>Compare</button>
             </div>}
-            {currentTab === 'Monthly' && <div>
-                <select value={firstMonth} onChange={(e) => setFirstMonth(e.target.value)}>
+            {currentTab === 'Monthly' && <div className='flex gap-12 items-center'>
+                <select className='px-2 py-1 rounded-md bg-slate-300' value={firstMonth} onChange={(e) => setFirstMonth(e.target.value)}>
                     {MONTHS.map(month => <option value={month.value}>{month.month}</option>)}
                 </select>
-                <select value={secondMonth} onChange={(e) => setSecondMonth(e.target.value)}>
+                <span className='font-bold'>with</span>
+                <select className='px-2 py-1 rounded-md bg-slate-300' value={secondMonth} onChange={(e) => setSecondMonth(e.target.value)}>
                     {MONTHS.map(month => <option value={month.value}>{month.month}</option>)}
                 </select>
-                <button onClick={() => {
+                <button className='bg-slate-800 px-4 py-1 rounded-md text-white font-medium' onClick={() => {
                     const data = getComparisonData({ currentTab: 'Monthly', _firstMonth: firstMonth, _secondMonth: secondMonth })
                     setComparisonData(data)
                 }}>Compare</button>
